@@ -145,8 +145,10 @@ library(RColorBrewer)
 
 ################################################################################
 ## Variante 8: MIT COUNTRY PLOTS #optimiert für 50x75cm Druck
+setwd("C:/Users/chris/coding/short_history_R")
+library(RColorBrewer)
 library(sp) 
-load("C:\\Dokumente und Einstellungen\\toc\\Eigene Dateien\\R\\Art_Plots\\Country Plots\\world_countries.rda")
+load("Polygon Plot/Country Plots/world_countries.rda")
 
   jj=paste("No_M",round(runif(1,min=2.501,max=1000.499)))
   #png(paste("polygons",jj,"_1200dpi.png",sep=""),width=6000,height=4000,res=1200)
