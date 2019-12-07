@@ -1,0 +1,118 @@
+#setwd("C:/Users/CUT/Documents/R/Shiny Apps/Art_plot")
+
+art_plot<-function(no.row=3, # no.
+                   no.col=3,
+                   prob.red=0.08, 
+                   prob.blue=0.08,
+                   prob.yellow=0.08,
+                   empty.allowed=T,
+                   random_lines=T){ #re-inforce Lines
+ 
+  # Colors approximated from original painting
+  col1<-"#cdd8d4" # RGB(205, 216, 212,name="RGB")  #"white"   
+  col2<-"#b72709" # RGB(183, 39, 9)    #brewer.pal(9, "OrRd")[9]  #"red"    
+  col3<-"#02225a" # RGB(2, 34, 90)          #brewer.pal(9, "YlGnBu")[9]  #"blue"   
+  col4<-"#d9aa02" # RGB(217, 170, 2) #brewer.pal(8, "Set2")[6]  #"yellow"  
+  
+  # set the strength of black lines dependent on no. of columns/rows
+  lwds<-5/max(no.row,no.col) 
+  
+  # Layout of the plot dependent on the number of columns / rows
+  layout(matrix(c(1:(no.row*no.col)), nrow=no.row, ncol=no.col, byrow = TRUE))
+    par(mar=c(0,0,0,0))
+  
+  for(i in 1:(no.row*no.col)){
+    # set distance between horizontal lines (random)
+    x2<-runif(4,0.1,0.5)  
+    x<-c(0,cumsum(x2)/sum(x2)) 
+    # set distance between vertical lines (random)
+    y2<-runif(3,0.1,0.5)
+    y<-c(0,cumsum(y2)/sum(y2))
+    
+    # set colors of rectangles (random vector)
+    c.par<-runif((length(x)-1)*(length(y)-1),0,1)
+    cols<-matrix(rep(col1,(length(x)-1)*(length(y)-1)),nrow=(length(x)-1),ncol=(length(y)-1))
+      cols[c.par>(1-prob.red-prob.blue-prob.yellow)]<-col2
+      cols[c.par>(1-prob.blue-prob.yellow)]<-col3
+      cols[c.par>(1-prob.yellow)]<-col4
+      
+    
+    #Are completely empty plots allowed? (change to F if you want a nice output)
+    if(empty.allowed==T){NULL
+    }else{      
+      if(sum(!cols==col1)==0){cols[round(runif(1,0.5,length(cols)+0.5))]<-c(col2,col3,col4)[round(runif(1,0.5,3.5))]}
+    }
+    
+    # draw rectangles with random filling (no. of rectangles dependent on the number of columns / rows)
+    plot(1, type="n", axes=F, xlab="", ylab="",ylim=c(0,1),xlim=c(0,1))
+    for(i in 1:(length(x)-1)){
+      for(j in 1:(length(y)-1)){
+        rect(x[i],y[j],x[i+1],y[j+1],col=cols[i,j],border="black",lwd=lwds)   #hier unterschiedliche Linienstärke implementiert - Problem: Rechtecke - nicht linien *runif(1,0.6,1.3)
+      }
+    }
+       
+    
+    ## change some boxes to larger and smaller boxes (add lines/ remove lines)
+    
+    # Random parameter (determines if any change is conducted)
+    add<-runif(1,0,1)
+    
+    # Determine additional colors
+    c.par.add<-runif(4,0,1) # for some additional random draws 
+      cols.add<-rep(col1,4)
+      cols.add[c.par.add>(1-prob.red-prob.blue-prob.yellow)]<-col2
+      cols.add[c.par.add>(1-prob.blue-prob.yellow)]<-col3
+      cols.add[c.par.add>(1-prob.yellow)]<-col4
+ 
+    
+    #divide some random rectangle vertically (with p=0.333)
+    
+    if(add>0.666){
+      i=round(runif(1,0.5,(length(x)-0.5)),0)
+      j=round(runif(1,0.5,(length(y)-0.5)),0)
+      line_pos=x[i+1]-((x[i+1]-x[i])*runif(1,0.2,0.8))
+      
+      if(runif(1,0,1) >0.5){   
+        rect(x[i],y[j],line_pos,y[j+1],col=cols.add[1],border="black",lwd=lwds)
+      }else{
+        rect(x[i+1],y[j],line_pos,y[j+1],col=cols.add[2],border="black",lwd=lwds)
+      }
+    }
+    # divide another random rectangle vertically (with p=0.167)
+    if(add>0.833){
+      i=round(runif(1,0.5,(length(x)-0.5)),0)
+      j=round(runif(1,0.5,(length(y)-0.5)),0)
+      line_pos=x[i+1]-((x[i+1]-x[i])*runif(1,0.2,0.8))
+      if(runif(1,0,1) >0.5){
+        rect(x[i],y[j],line_pos,y[j+1],col=cols.add[3],border="black",lwd=lwds)
+      }else{
+        rect(x[i+1],y[j],line_pos,y[j+1],col=cols.add[4],border="black",lwd=lwds)
+      }
+    }  
+   
+    #make lines randomly stronger 
+    if(random_lines==T){
+      for(k in 2:(length(x)-1)){lines(c(x[k],x[k]),c(0,1),lwd=lwds*runif(1,1.2,2.4))}
+      for(m in 2:(length(y)-1)){lines(c(0,1),c(y[m],y[m]),lwd=lwds*runif(1,1.2,2.4))}
+    }
+    
+    # remove some borders and draw a larger completely white rectangle instead (with p=0.333)
+      # Note: if user chooses to have a lot of colors (p>0.8), this function is skipped )
+    if(add<0.333 & sum(prob.red,prob.blue,prob.yellow)<0.8){
+      i=round(runif(1,1.5,(length(x)-1.5)),0)    
+      j=round(runif(1,1.5,(length(y)-1.5)),0)     
+      # with p=0.5 a vertical border is removed, else a horizontal one
+      if(runif(1,0,1) >0.5){rect(x[i],y[1],x[i+1],y[length(y)],col=col1,border="black",lwd=lwds)
+        }else{              rect(x[1],y[j],x[length(x)],y[j+1],col=col1,border="black",lwd=lwds)}
+    }
+    
+    rect(0,0,1,1, border="white",lwd=lwds*2.4)
+  }
+}  
+
+save(art_plot,file="art_plot.RData")
+
+## test execute
+art_plot()
+
+
