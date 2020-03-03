@@ -1,1 +1,5 @@
+We have written a small R applications which facilitates the assessment of own or a team's data science skills (see folder with the respective shinyapp)
 
+It focus more on technical skills and less on organizational skills e.g. Data Governance etc. 
+
+It's easily extendible, feedback welcome.
